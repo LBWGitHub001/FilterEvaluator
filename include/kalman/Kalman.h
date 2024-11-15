@@ -7,9 +7,10 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include <functional>
+#include "FilterManager.h"
 
 template<int N_X, int N_Z>
-class KalmanFilter {
+class KalmanFilter{
 public:
     KalmanFilter() = default;
 

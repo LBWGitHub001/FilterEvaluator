@@ -4,8 +4,11 @@
 
 #include "FilterManager.h"
 
-FilterManager::FilterManager():
-rclcpp::Node("filter_manager"){
+FilterManager::FilterManager(){
 
+
+}
+
+FilterManager::~FilterManager() {
 
 }

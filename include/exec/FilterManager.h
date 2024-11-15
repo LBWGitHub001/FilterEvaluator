@@ -7,17 +7,17 @@
 
 //std
 #include <vector>
-#include <rclcpp/rclcpp.hpp>
 #include <opencv2/opencv.hpp>
 //project
 #include "Kalman.h"
 #include "MLS.h"
 
-class FilterManager :
-    public rclcpp::Node{
+class FilterManager {
 public:
     FilterManager();
     ~FilterManager();
+
+
 
 
 private:
