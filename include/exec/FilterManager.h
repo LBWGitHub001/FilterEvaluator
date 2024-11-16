@@ -9,8 +9,10 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 //project
+#include "Robot.h"
 #include "Kalman.h"
 #include "MLS.h"
+
 
 class FilterManager {
 public:

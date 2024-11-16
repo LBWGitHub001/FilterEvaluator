@@ -53,7 +53,7 @@ print_var(FILTER_LIBS)
 ############项目编译构建##########################
 ament_auto_add_executable(filter ${EXEC_SRCS})
 
-target_link_libraries(filter ${OpenCV_LIBS} ${FILTER_LIBS})
+target_link_libraries(filter ${OpenCV_LIBS} ${FILTER_LIBS} ${NCURSES_LIBS})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
