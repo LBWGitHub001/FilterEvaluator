@@ -25,7 +25,7 @@ void visualize(Robot &rbt) {
     }
 }
 
-void filter(Robot &rbt) {
+void filter_(Robot &rbt) {
     std::cout << "Filter Thread Start!" << std::endl;
     while (true) {
         if (!armors_is_busy) {
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
     Robot rbt(50, 0, 0, 0, 0, 0.1);
     std::thread visual_thread(visualize, std::ref(rbt));
-    std::thread filter_thread(filter, std::ref(rbt));
+    std::thread filter_thread(filter_, std::ref(rbt));
 
     std::cout << "asd" << std::endl;
     if (visual_thread.joinable()) {
