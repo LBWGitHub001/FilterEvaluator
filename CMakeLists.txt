@@ -43,6 +43,7 @@ print_var(LMS_SRCS)
 include_directories(${ALL_INCLUDE})
 
 ##############静态库编译##################
+#add_library(NCURSES_LIBS "/usr/lib/x86_64-linux-gnu")
 add_library(filter_kalman ${KALMAN_SRCS})
 add_library(filter_mls ${MLS_SRCS})
 add_library(filter_lms ${LMS_SRCS})
@@ -53,7 +54,7 @@ print_var(FILTER_LIBS)
 ############项目编译构建##########################
 ament_auto_add_executable(filter ${EXEC_SRCS})
 
-target_link_libraries(filter ${OpenCV_LIBS} ${FILTER_LIBS} ${NCURSES_LIBS})
+target_link_libraries(filter ${OpenCV_LIBS} ${FILTER_LIBS} "/usr/lib/x86_64-linux-gnu/libncurses.so")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

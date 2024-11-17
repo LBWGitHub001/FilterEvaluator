@@ -18,10 +18,8 @@
 #include "Armor.h"
 #include "Mutexs.h"
 
-
-
-constexpr int width = 640;
-constexpr int height = 360;
+constexpr int width = 960;
+constexpr int height = 540;
 
 constexpr double r = 30.0;  //机器人半径
 constexpr double b = 20.0;   //装甲板半宽度
@@ -45,6 +43,13 @@ public:
     void setX(double val);
     void setY(double val);
     void setYaw(double val);
+
+    void addVx(double val);
+    void addVy(double val);
+    void addVyaw(double val);
+    void addX(double val);
+    void addY(double val);
+    void addYaw(double val);
 
     Result* getVisibleArmors();
 

@@ -105,6 +105,13 @@ void Robot::show(Color color) {
 
     }
 
+    std::string vx = "Vx:" + std::to_string(_v_x);
+    std::string vy = "Vy:" + std::to_string(_v_y);
+    std::string vyaw = "Vyaw:" + std::to_string(_v_yaw);
+    cv::putText(img, vx, cv::Point(1300, 30), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 3);
+    cv::putText(img, vy, cv::Point(1300, 80), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 3);
+    cv::putText(img, vyaw, cv::Point(1300, 130), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 3);
+
     delete data;
     cv::imshow("view", img);
 }
@@ -172,6 +179,31 @@ void Robot::setYaw(double val) {
     _yaw = val;
 
 }
+
+void Robot::addVx(double val) {
+    _v_x += val;
+}
+
+void Robot::addVy(double val) {
+_v_y += val;
+}
+
+void Robot::addVyaw(double val) {
+    _v_yaw += val;
+}
+
+void Robot::addX(double val) {
+    _x += val;
+}
+
+void Robot::addY(double val) {
+    _y += val;
+}
+
+void Robot::addYaw(double val) {
+    _yaw += val;
+}
+
 
 
 

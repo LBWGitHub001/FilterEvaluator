@@ -6,6 +6,7 @@
 #define NEW_FILTER_FILTERMANAGER_H
 
 //std
+#include <functional>
 #include <vector>
 #include <opencv2/opencv.hpp>
 //project
@@ -13,17 +14,21 @@
 #include "Kalman.h"
 #include "MLS.h"
 
-
+//定义滤波器的基类
 class FilterManager {
 public:
-    FilterManager();
-    ~FilterManager();
+    FilterManager() = default;
 
+    ~FilterManager() = default;
 
+    virtual void init() = 0;
+
+    virtual std::shared_ptr<Eigen::MatrixXd> update(const Eigen::VectorXd &data) = 0;
+
+    virtual void *getFilter() = 0;
 
 
 private:
-
 
 
 };
