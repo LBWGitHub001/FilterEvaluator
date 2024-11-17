@@ -13,6 +13,7 @@
 #include "Robot.h"
 #include "Kalman.h"
 #include "MLS.h"
+#include "config.h"
 
 //定义滤波器的基类
 class FilterManager {

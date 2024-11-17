@@ -16,7 +16,7 @@ using Translation = KalmanFilter<CA_Tran_Kalman,CZ_Tran_Kalman>;
 class KF_filter :
     public FilterManager{
 public:
-    KF_filter(const std::string &filter_mode);
+    KF_filter(const FilterType filterType);
     ~KF_filter();
 
     void init() override;
@@ -28,7 +28,7 @@ private:
     //滤波器
     void* kf;
     //基础参数
-    std::string filter_mode;
+    FilterType filterType;
     int StateSize;
     int MeasurementSize;
 

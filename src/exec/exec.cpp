@@ -6,8 +6,10 @@
 #include <thread>
 #include <termio.h>
 #include <chrono>
+#include <random>
 //project
 #include "KF_filter.h"
+#include "config.h"
 
 
 using tran_Kalman = KalmanFilter<CA_Tran_Kalman, CZ_Tran_Kalman>;
@@ -16,7 +18,26 @@ using rota_Kalman = KalmanFilter<CA_Rota_Kalman, CZ_Rota_Kalman>;
 //std::condition_variable armors_cv;
 std::atomic<bool> armors_is_busy;
 
+double generateGaussianNoise(double mean, double stddev);
 int scanKeyboard();
+
+template<class T>
+void genNoise(T& data, NoiseType noise_type, double noise_level){
+    if(noise_type == NoiseType::Gaussian){
+        try{
+            for(auto &val : data){
+                val += generateGaussianNoise(0, noise_level);
+                if(rand()%100 < 1){
+                    val *= 100;
+                }
+            }
+        }
+        catch (...){
+            std::cerr << "[Error]The variables type must be iterable" << std::endl;
+        }
+    }
+
+}
 
 void visualize(Robot &rbt) {
     std::cout << "DataGenerator Thread Start!" << std::endl;
@@ -33,8 +54,8 @@ void visualize(Robot &rbt) {
 
 void filter_(Robot &rbt) {
     std::cout << "Filter Thread Start!" << std::endl;
-    KF_filter kf_rotation("Rotation");
-    KF_filter kf_translation("Translation");
+    //KF_filter kf_rotation("Rotation");
+    //KF_filter kf_translation("Translation");
     while (true) {
         if (!armors_is_busy) {
             armors_is_busy = true;
@@ -108,10 +129,11 @@ void Keyboard(Robot &rbt) {
 
 }
 
-void test();
+void test(bool);
 
 int main(int argc, char **argv) {
-    //test();
+    test(false);
+    srand(time(nullptr));
     Robot rbt(50, 0, 0, 0, 0, 0.1);
     std::thread visual_thread(visualize, std::ref(rbt));
     std::thread filter_thread(filter_, std::ref(rbt));
@@ -128,7 +150,6 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-
 
 int scanKeyboard() {
     int in;
@@ -148,23 +169,26 @@ int scanKeyboard() {
     return in;
 }
 
+double generateGaussianNoise(double mean, double stddev) {
+    // 创建随机数生成器
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-void test() {
-    while (1) {
-        printf(":%d", scanKeyboard());
+    // 创建正态分布
+    std::normal_distribution<> d(mean, stddev);
+
+    // 返回生成的正态分布随机数
+    return d(gen);
+}
+
+void test(bool isStop = true) {
+    std::vector<double> testvec{1,2,3,4,5,6,7};
+    genNoise<std::vector<double>>(testvec,NoiseType::Gaussian,0.1);
+    for (auto &i:testvec) {
+        std::cout << i << std::endl;
     }
+    KF_filter kf_rotation(FilterType::Rotation);
+    while(isStop);
 }
 
 
-/*
-    Eigen::Matrix<double,3,1> a;
-    Eigen::Matrix<double,1,1> b;
-    a << 1,2,3;
-    b << 4;
-    std::cout << a << std::endl;
-    a.block(0,0,a.rows()-1,a.cols()) = a.block(1,0,a.rows()-1,a.cols());
-    std::cout << a << std::endl;
-    a.block(a.rows()-1,0,1,1) = b;
-    std::cout << a << std::endl;
- *
- * */

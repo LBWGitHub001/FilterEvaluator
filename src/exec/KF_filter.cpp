@@ -4,12 +4,13 @@
 
 #include "KF_filter.h"
 
-KF_filter::KF_filter(const std::string &filter_mode) : FilterManager(), filter_mode(filter_mode) {
-    if (filter_mode == "Rotation") {
-        StateSize = CA_Rota_Kalman;
+KF_filter::KF_filter(const FilterType filterType) : FilterManager(), filterType(filterType) {
+    if (filterType == FilterType::Translation) {
+        StateSize = CA_Tran_Kalman;
         MeasurementSize = CZ_Tran_Kalman;
         H.resize(MeasurementSize, StateSize);
-        H << 1, 0, 0;
+        H << 1, 0, 0, 0, 0, 0,
+                0, 0, 0, 1, 0, 0;
         A = [this]() {
             Eigen::MatrixXd A_(StateSize, StateSize);
             A_ << 1, _dt, 0.5 * _dt * _dt, 0, 0, 0,
@@ -33,20 +34,20 @@ KF_filter::KF_filter(const std::string &filter_mode) : FilterManager(), filter_m
                     0, _dt;
             return G * U * G.transpose();
         };
-        auto R = [this](const Eigen::Matrix<double, CZ_Rota_Kalman, 1> &z) {
+        auto R = [this](const Eigen::Matrix<double, CZ_Tran_Kalman, 1> &z) {
             Eigen::MatrixXd R_(MeasurementSize, MeasurementSize);
-            R_ << r_yaw_ * std::abs(z[0]);
+            R_ << r_x_ * std::abs(z[0]), 0,
+                    0, r_y_ * std::abs(z[1]);
             return R_;
         };
         P = Eigen::MatrixXd::Identity(StateSize, StateSize);
 
-        kf = new Rotation(A(), H, P, Q, R);
-    } else if (filter_mode == "Translation") {
-        StateSize = CA_Tran_Kalman;
+        kf = new Translation(A(), H, P, Q, R);
+    } else if (filterType == FilterType::Rotation) {
+        StateSize = CA_Rota_Kalman;
         MeasurementSize = CZ_Rota_Kalman;
         H.resize(MeasurementSize, StateSize);
-        H << 1, 0, 0, 0, 0, 0,
-                0, 0, 0, 1, 0, 0;
+        H << 1, 0, 0;
         A = [this]() {
             Eigen::MatrixXd A_(StateSize, StateSize);
             A_ << 1, _dt, 0.5 * _dt * _dt,
@@ -61,15 +62,14 @@ KF_filter::KF_filter(const std::string &filter_mode) : FilterManager(), filter_m
             G << _dt, _dt, _dt;
             return G * U * G.transpose();
         };
-        auto R = [this](const Eigen::Matrix<double, CZ_Tran_Kalman, 1> &z) {
+        auto R = [this](const Eigen::Matrix<double, CZ_Rota_Kalman, 1> &z) {
             Eigen::MatrixXd R_(MeasurementSize, MeasurementSize);
-            R_ << r_x_ * std::abs(z[0]), 0,
-                    0, r_y_ * std::abs(z[1]);
+            R_ << r_yaw_ * std::abs(z[0]);
             return R_;
         };
         P = Eigen::MatrixXd::Identity(StateSize, StateSize);
 
-        kf = new Translation(A(), H, P, Q, R);
+        kf = new Rotation(A(), H, P, Q, R);
     }
 
     s2qx = 0.1;
@@ -91,9 +91,9 @@ std::shared_ptr<Eigen::MatrixXd> KF_filter::update(const Eigen::VectorXd &data) 
     auto timestamp_now = get_timestamp();
     _dt = timestamp_now - _timestamp;
     std::shared_ptr<Eigen::MatrixXd> state;
-    if (filter_mode == "Rotation") {
+    if (filterType == FilterType::Rotation) {
         state = std::make_shared<Eigen::MatrixXd>(static_cast<Rotation *>(kf)->update(data));
-    } else {
+    } else if (filterType == FilterType::Translation){
         state = std::make_shared<Eigen::MatrixXd>(static_cast<Rotation *>(kf)->update(data));
     }
 
