@@ -21,7 +21,7 @@
 constexpr int width = 960;
 constexpr int height = 540;
 
-constexpr double r = 30.0;  //机器人半径
+constexpr double r = 100.0;  //机器人半径
 constexpr double b = 20.0;   //装甲板半宽度
 constexpr double h = 15.0;  //装甲板高度
 constexpr double f = 200.0;   //相机焦距

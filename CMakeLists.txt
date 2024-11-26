@@ -44,9 +44,9 @@ include_directories(${ALL_INCLUDE})
 
 ##############静态库编译##################
 #add_library(NCURSES_LIBS "/usr/lib/x86_64-linux-gnu")
-add_library(filter_kalman ${KALMAN_SRCS})
-add_library(filter_mls ${MLS_SRCS})
-add_library(filter_lms ${LMS_SRCS})
+add_library(filter_kalman STATIC ${KALMAN_SRCS})
+add_library(filter_mls STATIC ${MLS_SRCS})
+add_library(filter_lms STATIC ${LMS_SRCS})
 list(APPEND FILTER_LIBS
         ${filter_kalman} ${filter_mls} ${filter_lms}
 )

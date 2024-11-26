@@ -8,6 +8,7 @@
 #include <chrono>
 #include <random>
 //project
+#include "DrawGraph.h"
 #include "KF_filter.h"
 #include "config.h"
 
@@ -47,6 +48,9 @@ void visualize(Robot &rbt) {
             rbt.update(0.03);
             armors_is_busy = false;
         }
+        else{
+            std::cout << "armors_is_busy" << std::endl;
+        }
 
         cv::waitKey(1);
     }
@@ -56,20 +60,27 @@ void filter_(Robot &rbt) {
     std::cout << "Filter Thread Start!" << std::endl;
     //KF_filter kf_rotation("Rotation");
     //KF_filter kf_translation("Translation");
+
+    DrawGraph graph_drawer;
+    graph_drawer.createScreen("armorCenter.x");
     while (true) {
         if (!armors_is_busy) {
             armors_is_busy = true;
             Result *data;
             data = rbt.getVisibleArmors();
             if (data != nullptr) {
-
+                graph_drawer.addPoint("armorCenter.x", data->armorCenter.x);
+                graph_drawer.addPoint("armorCenter.x", data->armorCenter.y);
             }
 
             armors_is_busy = false;
-            cv::waitKey(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            graph_drawer.showAll();
         }
 
     }
+
+    graph_drawer.destoryScreen("test");
 
 }
 
@@ -134,7 +145,7 @@ void test(bool);
 int main(int argc, char **argv) {
     test(false);
     srand(time(nullptr));
-    Robot rbt(50, 0, 0, 0, 0, 0.1);
+    Robot rbt(200, 0, 0, 0, 0, 0.1);
     std::thread visual_thread(visualize, std::ref(rbt));
     std::thread filter_thread(filter_, std::ref(rbt));
     std::thread keyboard_thread(Keyboard, std::ref(rbt));
