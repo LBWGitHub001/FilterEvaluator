@@ -11,6 +11,7 @@
 #include "DrawGraph.h"
 #include "KF_filter.h"
 #include "config.h"
+#include "filter.cpp"
 
 
 using tran_Kalman = KalmanFilter<CA_Tran_Kalman, CZ_Tran_Kalman>;
@@ -58,19 +59,32 @@ void visualize(Robot &rbt) {
 
 void filter_(Robot &rbt) {
     std::cout << "Filter Thread Start!" << std::endl;
-    //KF_filter kf_rotation("Rotation");
-    //KF_filter kf_translation("Translation");
+    KF_filter kf_rotation(FilterType::Rotation);
+    KF_filter kf_translation(FilterType::Translation);
 
     DrawGraph graph_drawer;
-    graph_drawer.createScreen("armorCenter.x");
     while (true) {
         if (!armors_is_busy) {
             armors_is_busy = true;
             Result *data;
             data = rbt.getVisibleArmors();
             if (data != nullptr) {
-                graph_drawer.addPoint("armorCenter.x", data->armorCenter.x);
-                graph_drawer.addPoint("armorCenter.x", data->armorCenter.y);
+                //添加噪声
+                Result noised_data;
+                noised_data.armorCenter.x = data->armorCenter.x + generateGaussianNoise(0, 1);
+                noised_data.armorCenter.y = data->armorCenter.y + generateGaussianNoise(0, 1);
+                noised_data.yaw = data->yaw + generateGaussianNoise(0, 0.5);
+
+                //旋转运动滤波
+                Eigen::Matrix<double, 1, 1> measurement_rota;
+                measurement_rota << noised_data.armorCenter.x;
+                auto AfterMeasurement = kf_rotation.update(measurement_rota);
+                noised_data.yaw = (*AfterMeasurement)(0);
+                std::cout << "AfterMeasurement: " << (*AfterMeasurement)(0) << std::endl;
+
+                graph_drawer.addPoint("Real yaw", data->yaw);
+                graph_drawer.addPoint("Mearsure yaw", noised_data.yaw);
+
             }
 
             armors_is_busy = false;
@@ -148,11 +162,11 @@ int main(int argc, char **argv) {
     Robot rbt(200, 0, 0, 0, 0, 0.1);
     std::thread visual_thread(visualize, std::ref(rbt));
     std::thread filter_thread(filter_, std::ref(rbt));
-    std::thread keyboard_thread(Keyboard, std::ref(rbt));
+    //std::thread keyboard_thread(Keyboard, std::ref(rbt));
 
-    if (keyboard_thread.joinable()) {
-        keyboard_thread.join();
-    }
+    //if (keyboard_thread.joinable()) {
+    //    keyboard_thread.join();
+    //}
     if (visual_thread.joinable()) {
         visual_thread.join();
     }
@@ -194,7 +208,7 @@ double generateGaussianNoise(double mean, double stddev) {
 
 void test(bool isStop = true) {
     std::vector<double> testvec{1,2,3,4,5,6,7};
-    genNoise<std::vector<double>>(testvec,NoiseType::Gaussian,0.1);
+    genNoise<std::vector<double>>(testvec,NoiseType::Gaussian,1);
     for (auto &i:testvec) {
         std::cout << i << std::endl;
     }

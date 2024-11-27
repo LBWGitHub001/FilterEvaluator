@@ -66,7 +66,7 @@ Robot::calLocGraph(std::shared_ptr<std::vector<cv::Point2f *>> realPoints,
 }
 
 void Robot::show(Color color) {
-    std::cout << "Update Robot" << std::endl;
+    //std::cout << "Update Robot" << std::endl;
     cv::Mat img = cv::Mat::zeros(height * 2, width * 2, CV_8UC3);
     cv::Scalar colorType;
     if (color == Color::RED) {

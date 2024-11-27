@@ -60,7 +60,7 @@ GraphInfo::GraphInfo() : maxIndex(0),maxVal(10),minVal(0),unit(10.0/300) {
     img = cv::Mat::zeros(GraphHeight,GraphWidth, CV_8UC3);
 }
 
-void GraphInfo::addData(const std::string& label,double val) {
+void GraphInfo::addData(double val) {
     if(val <= maxVal && val >= minVal){
         val = getPointVal(val,unit);
         maxIndex += STEP;
@@ -84,7 +84,7 @@ void GraphInfo::addData(const std::string& label,double val) {
             (*iter)->y = getRealVal((*iter)->y,unit);
             (*iter)->y = getPointVal((*iter)->y,newUnit);
             if(iter != points.begin()){
-                cv::line(img,**(iter-1), **iter, colors[label], 2, 8);
+                cv::line(img,**(iter-1), **iter, color, 2, 8);
             }
         }
 
@@ -94,9 +94,9 @@ void GraphInfo::addData(const std::string& label,double val) {
 
 }
 
-void GraphInfo::update(const std::string& label) {
+void GraphInfo::update() {
     if(points.size() > 1){
-        cv::line(img, *points[points.size()-2], *points[points.size()-1], colors[label], 2, 8, 0);
+        cv::line(img, *points[points.size()-2], *points[points.size()-1], color, 2, 8, 0);
     }
 
 }
@@ -110,17 +110,10 @@ void GraphInfo::showImg() {
     cv::waitKey(0);
 }
 
-cv::Scalar &GraphInfo::getColor(const std::string& label) {
-    return colors[label];
+cv::Scalar &GraphInfo::getColor() {
+    return color;
 }
 
-void GraphInfo::setColor(const std::string& label,cv::Scalar color) {
-    this->colors[label] = color;
-}
-
-void GraphInfo::createLabel(const std::string& label) {
-    if(std::find(labels.begin(),labels.end(),label) == labels.end()){
-        labels.push_back(label);
-        colors[label] = cv::Scalar(rand()%256,rand()%256,rand()%256);
-    }
+void GraphInfo::setColor(cv::Scalar color) {
+    this->color = color;
 }

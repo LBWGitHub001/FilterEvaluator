@@ -17,19 +17,26 @@ constexpr int GraphWidth = 2000;
 class GraphInfo {
 public:
     static constexpr int STEP = 10;
+
     GraphInfo();
+
     ~GraphInfo() = default;
 
     void addData(double val);
+
     void update();
+
     std::function<int(double, double)> getPointVal;
     std::function<int(double, double)> getRealVal;
 
     void setName(std::string name);
+
     void setColor(cv::Scalar color);
-    cv::Scalar& getColor();
+
+    cv::Scalar &getColor();
 
     void showImg();
+
 private:
     cv::Mat img;
     std::vector<std::shared_ptr<cv::Point2f>> points;
@@ -52,7 +59,7 @@ public:
 
     void destoryScreen(const std::string name);
 
-    void addPoint(const std::string name,double val);
+    void addPoint(const std::string name, double val);
 
     void showAll();
 
