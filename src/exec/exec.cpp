@@ -43,10 +43,17 @@ void genNoise(T& data, NoiseType noise_type, double noise_level){
 
 void visualize(Robot &rbt) {
     std::cout << "DataGenerator Thread Start!" << std::endl;
+    //读取时间信息
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     while (true) {
         if (!armors_is_busy) {
             armors_is_busy = true;
-            rbt.update(0.03);
+
+            auto now = std::chrono::system_clock::now();
+            auto time_now = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+            rbt.update(0.01*(time_now - time));
+            time = time_now;
             armors_is_busy = false;
         }
         else{
@@ -59,8 +66,12 @@ void visualize(Robot &rbt) {
 
 void filter_(Robot &rbt) {
     std::cout << "Filter Thread Start!" << std::endl;
+    constexpr double NO_USE = 0.0;
+
     KF_filter kf_rotation(FilterType::Rotation);
     KF_filter kf_translation(FilterType::Translation);
+
+    kf_rotation.setQ(NO_USE,NO_USE,0.3,NO_USE,NO_USE,0.1);
 
     DrawGraph graph_drawer;
     while (true) {
@@ -73,18 +84,26 @@ void filter_(Robot &rbt) {
                 Result noised_data;
                 noised_data.armorCenter.x = data->armorCenter.x + generateGaussianNoise(0, 1);
                 noised_data.armorCenter.y = data->armorCenter.y + generateGaussianNoise(0, 1);
-                noised_data.yaw = data->yaw + generateGaussianNoise(0, 0.5);
+                noised_data.yaw = data->yaw + generateGaussianNoise(0, 0.1);
+                graph_drawer.addPoint("Before yaw", noised_data.yaw);
 
                 //旋转运动滤波
                 Eigen::Matrix<double, 1, 1> measurement_rota;
-                measurement_rota << noised_data.armorCenter.x;
-                auto AfterMeasurement = kf_rotation.update(measurement_rota);
-                noised_data.yaw = (*AfterMeasurement)(0);
-                std::cout << "AfterMeasurement: " << (*AfterMeasurement)(0) << std::endl;
+                measurement_rota << noised_data.yaw;
+                auto AfterMeasurement = *kf_rotation.update(measurement_rota);
+                noised_data.yaw = AfterMeasurement(0);
+                std::cout << "RealMeasurement: " << data->yaw << std::endl;
+                std::cout << "AfterMeasurement: " << AfterMeasurement(0) << " " << AfterMeasurement(1) << " " << AfterMeasurement(2) << std::endl;
 
                 graph_drawer.addPoint("Real yaw", data->yaw);
                 graph_drawer.addPoint("Mearsure yaw", noised_data.yaw);
 
+            }
+            else{
+                Eigen::MatrixXd state_rota;
+                state_rota.resize(3, 1);
+                state_rota << 0, 0, 0;
+                kf_rotation.init(state_rota);
             }
 
             armors_is_busy = false;

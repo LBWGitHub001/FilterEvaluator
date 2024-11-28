@@ -121,6 +121,8 @@ void Robot::update(double dt) {
     _x += _v_x * dt;
     _y += _v_y * dt;
     _yaw += _v_yaw * dt;
+    while(_yaw > 2*M_PI)
+        _yaw -= 2*M_PI;
     for (int i = 0; i < 4; i++) {
         double yaw = _yaw + i * M_PI / 2;
         auto armor = _armors[i];

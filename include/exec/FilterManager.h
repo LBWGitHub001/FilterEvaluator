@@ -22,7 +22,7 @@ public:
 
     ~FilterManager() = default;
 
-    virtual void init() = 0;
+    virtual void init(Eigen::MatrixXd &state) = 0;
 
     virtual std::shared_ptr<Eigen::MatrixXd> update(const Eigen::VectorXd &data) = 0;
 

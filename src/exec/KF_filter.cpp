@@ -95,8 +95,15 @@ KF_filter::KF_filter(const FilterType filterType) : FilterManager(), filterType(
     _timestamp = get_timestamp();
 }
 
-void KF_filter::init() {
-
+void KF_filter::init(Eigen::MatrixXd &state) {
+    if (filterType == FilterType::Rotation) {
+        auto filter = static_cast<Rotation *>(kf);
+        filter->setState(state);
+    }
+    else if (filterType == FilterType::Translation) {
+        auto filter = static_cast<Translation *>(kf);
+        filter->setState(state);
+    }
 }
 
 
@@ -106,8 +113,7 @@ std::shared_ptr<Eigen::MatrixXd> KF_filter::update(const Eigen::VectorXd &data) 
     std::shared_ptr<Eigen::MatrixXd> state;
     if (filterType == FilterType::Rotation) {
         auto filter = static_cast<Rotation *>(kf);
-
-        filter->predict();
+        auto temp = filter->predict();
         state = std::make_shared<Eigen::MatrixXd>(filter->update(data));
     } else if (filterType == FilterType::Translation){
         auto filter = static_cast<Translation *>(kf);
@@ -122,7 +128,7 @@ std::shared_ptr<Eigen::MatrixXd> KF_filter::update(const Eigen::VectorXd &data) 
 
 time_t KF_filter::get_timestamp() {
     auto now = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() * 0.001;
 }
 
 void *KF_filter::getFilter() {
@@ -132,6 +138,15 @@ void *KF_filter::getFilter() {
 
 KF_filter::~KF_filter() {
 
+}
+
+void KF_filter::setQ(double s2qx, double s2qy, double s2qyaw, double r_x, double r_y, double r_yaw) {
+    this->s2qx = s2qx;
+    this->s2qy = s2qy;
+    this->s2qyaw = s2qyaw;
+    this->r_x_ = r_x;
+    this->r_y_ = r_y;
+    this->r_yaw_ = r_yaw;
 }
 
 

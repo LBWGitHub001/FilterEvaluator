@@ -19,9 +19,11 @@ public:
     KF_filter(const FilterType filterType);
     ~KF_filter();
 
-    void init() override;
+    void init(Eigen::MatrixXd &state) override;
     std::shared_ptr<Eigen::MatrixXd> update(const Eigen::VectorXd &data) override;
     void* getFilter() override;
+
+    void setQ(double s2qx, double s2qy, double s2qyaw, double r_x, double r_y, double r_yaw);
 
 
 private:
